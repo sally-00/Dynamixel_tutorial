@@ -4,7 +4,7 @@
 - Language: Python (But you can use most of the languages with Dynaimxel SDK)
 
 ## Tutorial
-`Dynamixel_tutorial.pptx` for instructions on hardware setup, package download and running sample code.
+`Dynamixel_tutorial.pdf` for instructions on hardware setup, package download and running sample code.
 
 ## Sample code
 `dynamixel_sdk_sample_read_write.py` is a sample code given by dynamixel (modofied).
