@@ -31,32 +31,10 @@ else:
 os.sys.path.append('./DynamixelSDK-3.7.31/python/src')             # Path setting
 from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 
-# Control table address
-ADDR_OPERATING_MODE         = 11
-ADDR_TORQUE_ENABLE          = 64               # Control table address is different in Dynamixel model
-ADDR_GOAL_POSITION          = 116
-ADDR_PRESENT_POSITION       = 132
-ADDR_GOAL_CURRENT           = 102
-ADDR_PRESENT_CURRENT        = 126
+import my_utils as utils
+from my_global_variables_XL330M288T import *
 
-
-# Protocol version
-PROTOCOL_VERSION            = 2.0               # See which protocol version is used in the Dynamixel
-
-# Default setting
-DXL_ID                      = 1                 # Dynamixel ID : 1
-BAUDRATE                    = 57600             # Dynamixel default baudrate : 57600
-DEVICENAME                  = '/dev/tty.usbserial-FT89FANK'    # Check which port is being used on your controller
-                                                # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
-
-CURRENT_CONTROL_MODE        = 0
-TORQUE_ENABLE               = 1                 # Value for enabling the torque
-TORQUE_DISABLE              = 0                 # Value for disabling the torque
-DXL_MINIMUM_POSITION_VALUE  = 10                # Dynamixel will rotate between this value
-DXL_MAXIMUM_POSITION_VALUE  = 4080              # and this value (note that the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
-DXL_CURRENT_ERROR_THRESHOLD = 1                 # Dynamixel moving status threshold
-
-dxl_goal_current            = 10                # Goal current. current limit is [0,1750]
+dxl_goal_current            = 100                # Goal current. current limit is [0,1750]
 
 
 # Initialize PortHandler instance
@@ -88,85 +66,49 @@ else:
     getch()
     quit()
 
-print("Press any key to continue! (or press ESC to quit!) Look into wizard app control table")
-if getch() == chr(0x1b):
-    exit()
+utils.disable_torque(portHandler, packetHandler)
+
+# Go to the position in the middle for a safe start
+utils.go_to_middle_point(portHandler, packetHandler)
 
 # Set control mode
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, CURRENT_CONTROL_MODE)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Dynamixel has been set to current control mode")
+utils.set_control_mode(CURRENT_CONTROL_MODE, portHandler, packetHandler)
 
-print("Press any key to continue! (or press ESC to quit!) Look into wizard app control table")
+# Enable Dynamixel Torque
+utils.enable_torque(portHandler, packetHandler)
+
+print("About to start control. Press any key to continue! (or press ESC to quit!)")
 if getch() == chr(0x1b):
     exit()
 
-# Enable Dynamixel Torque
-# Dynamixel needs the TORQUE_ENABLE to be rotating or give you its internal information.
-# On the other hand, it doesn’t need torque enabled if you get your goal, so finally do TORQUE_DISABLE to prepare to the next sequence.
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Dynamixel has been successfully connected")
+# Read present position
+dxl_present_position = utils.read_present_position(portHandler, packetHandler)
 
-# Continue control until break
-while 1:
-    print("Press any key to continue! (or press ESC to quit!)")
-    if getch() == chr(0x1b):
-        break
+# Quit if close to position limit
+"""
+if dxl_present_position > DXL_MAXIMUM_POSITION_VALUE or dxl_present_position < DXL_MINIMUM_POSITION_VALUE:
+    print("Near position limit! Quiting control...")
+    exit()
+"""
+    
+# Write goal current
+utils.write_goal_current(dxl_goal_current, portHandler, packetHandler)
+print("Setting goal current to ", utils.read_goal_current(portHandler, packetHandler))
 
-    # Read present position
-    dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-
-    # Quit if close to position limit
-    if dxl_present_position > DXL_MAXIMUM_POSITION_VALUE or dxl_present_position < DXL_MINIMUM_POSITION_VALUE:
-        print("Near position limit! Quiting control...")
-        break
-
-    # Write goal current
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_CURRENT, dxl_goal_current)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-
+# Continue control until KeyboardInterrupt
+try:
     while 1:
         # Read present current
-        dxl_present_current, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_CURRENT)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("%s" % packetHandler.getRxPacketError(dxl_error))
-
+        dxl_present_current = utils.read_present_current(portHandler, packetHandler)
         print("[ID:%03d] GoalCurr:%03d  PresCurr:%03d" % (DXL_ID, dxl_goal_current, dxl_present_current))
 
-        if not abs(dxl_goal_current - dxl_present_current) > DXL_CURRENT_ERROR_THRESHOLD:
-            break
-
-    # Change goal position
-    if index == 0:
-        index = 1
-    else:
-        index = 0
+except KeyboardInterrupt:
+    # stop current control
+    utils.write_goal_current(0, portHandler, packetHandler)
 
 
 # Disable Dynamixel Torque
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
+utils.disable_torque(portHandler, packetHandler)
 
 # Close port
 portHandler.closePort()
