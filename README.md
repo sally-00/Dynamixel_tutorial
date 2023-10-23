@@ -34,3 +34,11 @@ The code to control dynamixel is basically reading and writing inforamtion at sp
 Size (Bytes) of the data is also specified on the control table. 
 
 For example, use `information, result, error = read4ByteTxRx(portHandler, Dynamixel_ID, Address_number)` to read a 4 byte information from Address_number, use `result, error = packetHandler.write2ByteTxRx(portHandler, Dynamixel_ID, Address_number, information)` to write information to Address_number which has a 2 byte size.
+
+## On-going Problem
+
+In `my_current_control.py`, cannot disable torque when trying to stop the control.
+
+It shows: `[TxRxResult] Port is in use!`.
+
+Current solution: switch off the power....
