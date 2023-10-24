@@ -66,10 +66,9 @@ else:
     getch()
     quit()
 
+# Use this to ensure torque is disabled, so that you can change control mode.
+# If you force quit program in the middle, the torque is not disabled properly at the end.
 utils.disable_torque(portHandler, packetHandler)
-
-# Go to the position in the middle for a safe start
-utils.go_to_middle_point(portHandler, packetHandler)
 
 # Set control mode
 utils.set_control_mode(CURRENT_CONTROL_MODE, portHandler, packetHandler)
