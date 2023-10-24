@@ -13,37 +13,38 @@ You can use most of the languages with Dynaimxel SDK. If using other Dynamixel m
 3. Run `dynamixel_sdk_sample_read_write.py` to try position control. Or, run `my_current_control.py` to try current/torque control. 
     (You might need to change `DEVICENAME` in `my_global_variables_XL330M288T.py` if not using Mac. Refer to the last page in `Dynamixel_tutorial.pdf`)
 
-## Tutorial
-`Dynamixel_tutorial.pdf` for instructions on hardware setup, package download and running sample code.
-
 ## Sample code
-`dynamixel_sdk_sample_read_write.py` is a sample code given by dynamixel (modofied).
-`my_current_control.py` is a sample code for current control.
+`dynamixel_sdk_sample_read_write.py` is a sample code given by dynamixel (modofied) that you can run for position control.
+`my_current_control.py` is a sample code for current control, which uses self-defined functions in `my_utils.py` and parameter definitions in `my_global_variables_XL330M288T.py`.
 
-## Tips
+Steps in code to do position or current control is:
+1. Set control mode to position/current control
+2. Enable torque
+3. Set goal position/current
+4. Read present position/current to check
+5. Disable torque after the task is done
 
-A few tips from my shallow experience with Dynamixel...
+#### Reading and writing information
 
-#### DYNAMIXEL Wizard applicaiton
+Upon a few settings at the beginning, the code to control dynamixel is basically reading and writing information at specific addresses which are defined in control table on each model's page (for example, [XL330-M288-T](https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/#control-table-description)).
+Size (Bytes) of the data is also specified on the control table. 
 
-The application cannot be used while running code to communicate with DYNAMIXEL.
+For example, use `information, result, error = read4ByteTxRx(portHandler, Dynamixel_ID, Address_number)` to read a 4 byte information from Address_number, use `result, error = packetHandler.write2ByteTxRx(portHandler, Dynamixel_ID, Address_number, information)` to write information to Address_number which has a 2 byte size.
 
 #### Enable torque
 
 You need to 'enable torque' (writing TORQUE_ENABLE to ADDR_TORQUE_ENABLE) to access dynamixel internal information.
 
-However, after enabling torque, a lot of settings are locked (you cannot write information to change them). To see what information is locked: enable torque on DYNAMIXEL Wizard application and check the control table on the app.
+However, after enabling torque, a lot of settings are locked (i.e. you cannot write information to change them). To see what information is locked: enable torque on DYNAMIXEL Wizard application and check the control table on the app.
 
 Thus,
 - Set operating mode and various limits etc. (all the parameters that will be lock) before enabling torque.
 - You might need to disable torque at the beginning of the code, if it was not disabled properly after last operation.
 
-#### Reading and Writing information
+## Tutorial
 
-The code to control dynamixel is basically reading and writing information at specific addresses which are defined in control table on each model's page (ex. [XL330-M288-T](https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/#control-table-description)).
-Size (Bytes) of the data is also specified on the control table. 
+Refer to `Dynamixel_tutorial.pdf` for instructions on hardware setup, package download, DYNAMIXEL Wizard applicaiton and running sample code.
 
-For example, use `information, result, error = read4ByteTxRx(portHandler, Dynamixel_ID, Address_number)` to read a 4 byte information from Address_number, use `result, error = packetHandler.write2ByteTxRx(portHandler, Dynamixel_ID, Address_number, information)` to write information to Address_number which has a 2 byte size.
 
 ## On-going Problem
 
