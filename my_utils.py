@@ -1,4 +1,5 @@
 import os
+import time
 
 if os.name == 'nt':
     import msvcrt
@@ -105,3 +106,12 @@ def go_to_position(goal_position, portHandler, packetHandler):
 
         if not abs(goal_position - dxl_present_position) > DXL_POSITION_MOVING_THRESHOLD:
             break
+
+def check_read_freq(portHandler, packetHandler):
+    # Check how many reading are done for one second
+    count = 0
+    ini_tic = time.perf_counter()
+    while time.perf_counter() - ini_tic < 1:
+        dxl_present_current = read_present_current(portHandler, packetHandler)
+        count += 1
+    print(count, " of readings are done in one second.")

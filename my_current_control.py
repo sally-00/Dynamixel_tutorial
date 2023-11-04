@@ -94,16 +94,10 @@ if dxl_present_position > DXL_MAXIMUM_POSITION_VALUE or dxl_present_position < D
 utils.write_goal_current(dxl_goal_current, portHandler, packetHandler)
 print("Setting goal current to ", utils.read_goal_current(portHandler, packetHandler))
 
-# Continue control until KeyboardInterrupt
-try:
-    while 1:
-        # Read present current
-        dxl_present_current = utils.read_present_current(portHandler, packetHandler)
-        print("[ID:%03d] GoalCurr:%03d  PresCurr:%03d" % (DXL_ID, dxl_goal_current, dxl_present_current))
-
-except KeyboardInterrupt:
-    # stop current control
-    utils.write_goal_current(0, portHandler, packetHandler)
+for i in range(3000):
+    # Write goal current and Read present current
+    dxl_present_current = utils.read_present_current(portHandler, packetHandler)
+    print("[ID:%03d] GoalCurr:%03d  PresCurr:%03d" % (DXL_ID, dxl_goal_current, dxl_present_current))
 
 
 # Disable Dynamixel Torque

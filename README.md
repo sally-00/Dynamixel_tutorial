@@ -31,6 +31,8 @@ Size (Bytes) of the data is also specified on the control table.
 
 For example, use `information, result, error = read4ByteTxRx(portHandler, Dynamixel_ID, Address_number)` to read a 4 byte information from Address_number, use `result, error = packetHandler.write2ByteTxRx(portHandler, Dynamixel_ID, Address_number, information)` to write information to Address_number which has a 2 byte size.
 
+For reference, reading or writing information takes around 15~16 milliseconds with my MacBook.
+
 #### Enable torque
 
 You need to 'enable torque' (writing TORQUE_ENABLE to ADDR_TORQUE_ENABLE) to access dynamixel internal information.
@@ -41,15 +43,10 @@ Thus,
 - Set operating mode and various limits etc. (all the parameters that will be lock) before enabling torque.
 - You might need to disable torque at the beginning of the code, if it was not disabled properly after last operation.
 
+## Attachment to motor
+
+`Dynamixel_attachment.stl` is an attachment to Dynamixel motor. You can 3D print it and use the screws that come with the Dynamixel to attach it. Dimensions of the attachment can be found in `Dynamixel_tutorial.pdf`.
+
 ## Tutorial
 
 Refer to `Dynamixel_tutorial.pdf` for instructions on hardware setup, package download, DYNAMIXEL Wizard applicaiton and running sample code.
-
-
-## On-going Problem
-
-In `my_current_control.py`, cannot disable torque when trying to stop the control.
-
-It shows: `[TxRxResult] Port is in use!`.
-
-Current solution: switch off the power to motor and disable torque at the beginning of the code.

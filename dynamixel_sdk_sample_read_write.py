@@ -50,6 +50,10 @@ else:
 os.sys.path.append('./DynamixelSDK-3.7.31/python/src')             # Path setting
 from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 
+import my_utils as utils
+
+POSITION_CONTROL_MODE       = 3
+
 # Control table address
 ADDR_PRO_TORQUE_ENABLE      = 64               # Control table address is different in Dynamixel model
 ADDR_PRO_GOAL_POSITION      = 116
@@ -102,6 +106,12 @@ else:
     print("Press any key to terminate...")
     getch()
     quit()
+
+# Use this to ensure torque is disabled, so that you can change control mode.
+# If you force quit program in the middle, the torque is not disabled properly at the end.
+utils.disable_torque(portHandler, packetHandler)
+# set control mode to position control
+utils.set_control_mode(POSITION_CONTROL_MODE, portHandler, packetHandler)
 
 # Enable Dynamixel Torque
 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE)

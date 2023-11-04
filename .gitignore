@@ -1,3 +1,6 @@
 Dynamixel_tutorial_from_other_people/
 __pycache__/
 *.pptx
+README_for_me.md
+current-torque-relationship.ipynb
+my_current_based_position_control.py
